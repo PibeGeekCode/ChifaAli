@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="p" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ffe0b2"/>
+      <stop offset="100%" stop-color="#ffcc80"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="#f8f9fa"/>
+  <g transform="translate(150,120)" filter="url(#shadow)">
+    <ellipse cx="250" cy="230" rx="230" ry="120" fill="#ffffff" stroke="#e0e0e0" stroke-width="6"/>
+    <ellipse cx="250" cy="220" rx="180" ry="80" fill="url(#p)"/>
+    <circle cx="210" cy="210" r="28" fill="#ef5350"/>
+    <circle cx="290" cy="240" r="24" fill="#66bb6a"/>
+    <rect x="235" y="185" width="30" height="30" rx="6" fill="#ffb300"/>
+    <circle cx="260" cy="210" r="14" fill="#8d6e63"/>
+  </g>
+  <text x="400" y="520" fill="#666" font-family="Segoe UI, Arial" font-size="28" text-anchor="middle">Plato</text>
+</svg>

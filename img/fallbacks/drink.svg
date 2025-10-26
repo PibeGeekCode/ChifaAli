@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff3cd"/>
+      <stop offset="100%" stop-color="#ffe08a"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="#f8f9fa"/>
+  <g transform="translate(250,80)" filter="url(#shadow)">
+    <rect x="100" y="40" width="200" height="400" rx="16" fill="#ffffff" stroke="#e0e0e0" stroke-width="6"/>
+    <rect x="112" y="60" width="176" height="300" rx="12" fill="url(#g)"/>
+    <rect x="100" y="20" width="200" height="30" rx="10" fill="#ffffff" stroke="#e0e0e0" stroke-width="6"/>
+    <circle cx="200" cy="320" r="36" fill="#ffc107" opacity="0.35"/>
+    <line x1="130" y1="120" x2="270" y2="120" stroke="#ffd54f" stroke-width="10" stroke-linecap="round" opacity="0.6"/>
+    <line x1="130" y1="180" x2="270" y2="180" stroke="#ffd54f" stroke-width="10" stroke-linecap="round" opacity="0.6"/>
+    <line x1="130" y1="240" x2="270" y2="240" stroke="#ffd54f" stroke-width="10" stroke-linecap="round" opacity="0.6"/>
+  </g>
+  <text x="400" y="520" fill="#666" font-family="Segoe UI, Arial" font-size="28" text-anchor="middle">Bebida</text>
+</svg>

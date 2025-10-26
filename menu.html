@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Menú - CHIFA ALI</title>
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+  <link rel="preconnect" href="https://source.unsplash.com" crossorigin>
+  <link rel="dns-prefetch" href="//images.unsplash.com">
+  <link rel="dns-prefetch" href="//source.unsplash.com">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">CHIFA ALI</h1>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="main-nav" id="mainNav">
+        <a href="index.html">Inicio</a>
+        <a href="menu.html" class="active">Menú</a>
+        <a href="reservas.html">Reservas</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="menu-section">
+      <h2>Nuestro Menú</h2>
+      <p class="subtitle">Auténtica comida china-peruana</p>
+      <div class="menu-controls">
+        <div class="menu-search">
+          <span class="icon">🔎</span>
+          <input id="menuSearch" type="search" placeholder="Buscar plato (ej: chaufa, tallarín, sopa)">
+        </div>
+        <nav class="menu-filters">
+          <a class="filter-pill" href="#entradas">🥟 Entradas</a>
+          <a class="filter-pill" href="#principales">🍲 Principales</a>
+          <a class="filter-pill" href="#postres">🍰 Postres</a>
+          <a class="filter-pill" href="#bebidas">🥤 Bebidas</a>
+        </nav>
+      </div>
+
+      <div class="menu-category" id="entradas">
+        <h3>Entradas</h3>
+        <div class="menu-items">
+          <div class="menu-item" data-id="1" data-name="Wantán Frito" data-price="15">
+            <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&h=300&fit=crop" alt="Wantán Frito">
+            <h4>Wantán Frito</h4>
+            <p>Masa rellena de cerdo y camarones, frita hasta dorar</p>
+            <span class="price">S/ 15.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="1">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="2" data-name="Sopa Wantán" data-price="18">
+            <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop" alt="Sopa Wantán">
+            <h4>Sopa Wantán</h4>
+            <p>Caldo de pollo con wantán y verduras frescas</p>
+            <span class="price">S/ 18.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="2">Agregar a reserva</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-category" id="principales">
+        <h3>Platos Principales</h3>
+        <div class="menu-items">
+          <div class="menu-item" data-id="3" data-name="Arroz Chaufa" data-price="25">
+            <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop" alt="Arroz Chaufa">
+            <h4>Arroz Chaufa Especial</h4>
+            <p>Arroz frito con pollo, cerdo, camarones y verduras</p>
+            <span class="price">S/ 25.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="3">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="4" data-name="Tallarín Saltado" data-price="28">
+            <img src="https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=300&fit=crop" alt="Tallarín Saltado">
+            <h4>Tallarín Saltado de Carne</h4>
+            <p>Fideos salteados con carne, cebolla, tomate y sillao</p>
+            <span class="price">S/ 28.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="4">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="5" data-name="Aeropuerto" data-price="30">
+            <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&h=300&fit=crop" alt="Aeropuerto">
+            <h4>Aeropuerto</h4>
+            <p>Combinación de arroz chaufa y tallarín saltado</p>
+            <span class="price">S/ 30.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="5">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="6" data-name="Pollo Tipakay" data-price="32">
+            <img src="https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400&h=300&fit=crop" alt="Pollo Tipakay">
+            <h4>Pollo Tipakay</h4>
+            <p>Pollo en trozos con salsa tamarindo, piña y vegetales</p>
+            <span class="price">S/ 32.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="6">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="14" data-name="Chi Jau Kay" data-price="35">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1630843255664-276d37f84c07?w=400&h=300&fit=crop&q=80" alt="Chi Jau Kay">
+            <h4>Chi Jau Kay</h4>
+            <p>Pollo crocante frito con salsa especial y verduras</p>
+            <span class="price">S/ 35.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="14">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="15" data-name="Chancho Agridulce" data-price="34">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400&h=300&fit=crop&q=80" alt="Chancho Agridulce">
+            <h4>Chancho Agridulce</h4>
+            <p>Cerdo frito con salsa agridulce, piña y pimientos</p>
+            <span class="price">S/ 34.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="15">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="16" data-name="Kam Lu Wantán" data-price="36">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400&h=300&fit=crop&q=80" alt="Kam Lu Wantán">
+            <h4>Kam Lu Wantán</h4>
+            <p>Wantán frito con verduras salteadas en salsa especial</p>
+            <span class="price">S/ 36.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="16">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="17" data-name="Chaufa de Mariscos" data-price="38">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1633504581786-316c8002b1b9?w=400&h=300&fit=crop&q=80" alt="Chaufa de Mariscos">
+            <h4>Chaufa de Mariscos</h4>
+            <p>Arroz frito con camarones, calamares y pulpo</p>
+            <span class="price">S/ 38.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="17">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="18" data-name="Lomo Saltado" data-price="33">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1595295333158-4742f28fbd85?w=400&h=300&fit=crop&q=80" alt="Lomo Saltado">
+            <h4>Lomo Saltado</h4>
+            <p>Lomo fino salteado con cebolla, tomate y papas fritas</p>
+            <span class="price">S/ 33.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="18">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="19" data-name="Siu Mai (6 und)" data-price="20">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1563245372-f21724e3856d?w=400&h=300&fit=crop&q=80" alt="Siu Mai">
+            <h4>Siu Mai (6 unidades)</h4>
+            <p>Dumplings al vapor de cerdo con salsa de soya</p>
+            <span class="price">S/ 20.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="19">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="20" data-name="Tallarín con Mariscos" data-price="40">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop&q=80" alt="Tallarín con Mariscos">
+            <h4>Tallarín con Mariscos</h4>
+            <p>Fideos salteados con frutos del mar y verduras</p>
+            <span class="price">S/ 40.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="20">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="21" data-name="Arroz con Pollo Chijaukay" data-price="31">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop&q=80" alt="Arroz con Pollo Chijaukay">
+            <h4>Arroz con Pollo Chijaukay</h4>
+            <p>Arroz frito con pollo crocante y vegetales salteados</p>
+            <span class="price">S/ 31.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="21">Agregar a reserva</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-category" id="postres">
+        <h3>Postres</h3>
+        <div class="menu-items">
+          <div class="menu-item" data-id="22" data-name="Suspiro a la Limeña" data-price="14">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop&q=80" alt="Suspiro a la Limeña">
+            <h4>Suspiro a la Limeña</h4>
+            <p>Dulce de leche con merengue de vino oporto</p>
+            <span class="price">S/ 14.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="22">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="23" data-name="Flan de la Casa" data-price="12">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1550606564-d6f37a2e6935?w=400&h=300&fit=crop&q=80" alt="Flan de la Casa">
+            <h4>Flan de la Casa</h4>
+            <p>Flan casero con caramelo al estilo tradicional</p>
+            <span class="price">S/ 12.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="23">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="24" data-name="Gelatina de Colores" data-price="8">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop&q=80" alt="Gelatina de Colores">
+            <h4>Gelatina de Colores</h4>
+            <p>Gelatina cremosa con capas de sabores</p>
+            <span class="price">S/ 8.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="24">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="25" data-name="Pie de Limón" data-price="15">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&q=80" alt="Pie de Limón">
+            <h4>Pie de Limón</h4>
+            <p>Tarta de limón con merengue tostado</p>
+            <span class="price">S/ 15.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="25">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="26" data-name="Mazamorra Morada" data-price="10">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1541529086526-db283c563270?w=400&h=300&fit=crop&q=80" alt="Mazamorra Morada">
+            <h4>Mazamorra Morada</h4>
+            <p>Postre tradicional peruano de maíz morado con frutas</p>
+            <span class="price">S/ 10.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="26">Agregar a reserva</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-category" id="bebidas">
+        <h3>Bebidas</h3>
+        <div class="menu-items">
+          <div class="menu-item" data-id="7" data-name="Chicha Morada" data-price="8">
+            <img src="https://images.unsplash.com/photo-1546173159-315724a31696?w=400&h=300&fit=crop" alt="Chicha Morada">
+            <h4>Chicha Morada</h4>
+            <p>Bebida tradicional peruana de maíz morado</p>
+            <span class="price">S/ 8.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="7">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="8" data-name="Inca Kola 500ml" data-price="7">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=400&h=300&fit=crop&q=80" alt="Inca Kola 500ml">
+            <h4>Inca Kola 500ml</h4>
+            <p>La bebida de sabor nacional, bien fría</p>
+            <span class="price">S/ 7.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="8">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="9" data-name="Limonada Clásica" data-price="10">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9c?w=400&h=300&fit=crop&q=80" alt="Limonada Clásica">
+            <h4>Limonada Clásica</h4>
+            <p>Refrescante y natural, perfecta para acompañar</p>
+            <span class="price">S/ 10.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="9">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="10" data-name="Té Helado de Durazno" data-price="9">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=300&fit=crop&q=80" alt="Té Helado de Durazno">
+            <h4>Té Helado de Durazno</h4>
+            <p>Té negro con notas de durazno y hielo</p>
+            <span class="price">S/ 9.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="10">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="11" data-name="Agua Mineral 600ml" data-price="5">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop&q=80" alt="Agua Mineral 600ml">
+            <h4>Agua Mineral 600ml</h4>
+            <p>Sin gas, ideal para hidratarte</p>
+            <span class="price">S/ 5.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="11">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="12" data-name="Cerveza Cusqueña 330ml" data-price="12">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=300&fit=crop&q=80" alt="Cerveza Cusqueña 330ml">
+            <h4>Cerveza Cusqueña 330ml</h4>
+            <p>Rubia helada para maridar tus platos</p>
+            <span class="price">S/ 12.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="12">Agregar a reserva</button>
+          </div>
+          <div class="menu-item" data-id="13" data-name="Jugo de Maracuyá" data-price="12">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop&q=80" alt="Jugo de Maracuyá">
+            <h4>Jugo de Maracuyá</h4>
+            <p>Ácido y dulce, recién preparado</p>
+            <span class="price">S/ 12.00</span>
+            <button class="btn btn-small add-to-reservation" data-id="13">Agregar a reserva</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">CHIFA ALI © 2025 · Todos los derechos reservados</div>
+  </footer>
+
+  <!-- Widget pedido flotante -->
+  <button id="orderWidget" class="order-widget" onclick="location.href='reservas.html'" title="Ir a reservas">
+    🛒 <span class="text">Pre-orden</span> <span class="badge" id="orderCount">0</span>
+  </button>
+
+  <script src="js/script.js"></script>
+  <script src="js/menu.js"></script>
+</body>
+</html>

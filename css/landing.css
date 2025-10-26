@@ -1,0 +1,501 @@
+/* Estilos Espectaculares para Landing Page - CHIFA ALI */
+
+/* Hero Fullscreen Impactante */
+.hero-fullscreen{
+  position:relative;
+ height:90vh;
+ min-height:600px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#000; /* será cubierto por hero-bg-stack */
+}
+
+.hero-bg-stack{
+  position:absolute; inset:0; z-index:0; overflow:hidden;
+}
+.hero-bg{
+  position:absolute; inset:0;
+  background-size:cover; background-position:50% 35%;
+  opacity:0; transition:opacity 1.2s ease-in-out, transform 6s ease;
+  will-change: opacity;
+}
+.hero-bg.active{ opacity:1; }
+
+.hero-overlay{
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.25) 100%);
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+  text-align:center;
+  color:var(--white);
+ max-width:800px;
+  padding:var(--spacing-2xl);
+  animation:heroFadeIn 1.2s ease-out;
+}
+
+@keyframes heroFadeIn{
+  from{opacity:0;transform:translateY(40px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.hero-title{
+ font-size:4rem;
+  font-weight:900;
+  margin-bottom:var(--spacing-lg);
+  line-height:1.1;
+ text-shadow:0 2px 30px rgba(0,0,0,0.5);
+ letter-spacing:0.05em;
+  animation:titleScale 1s ease-out 0.3s both;
+}
+
+@keyframes titleScale{
+  from{opacity:0;transform:scale(0.8)}
+  to{opacity:1;transform:scale(1)}
+}
+
+.hero-subtitle{
+ font-size:1.3rem;
+  margin-bottom:var(--spacing-2xl);
+  opacity:0.95;
+ font-weight:300;
+  text-shadow:0 2px 10px rgba(0,0,0,0.3);
+  animation:subtitleFade 1s ease-out 0.6s both;
+}
+
+@keyframes subtitleFade{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.hero-cta{
+  display:flex;
+  gap:var(--spacing-lg);
+  justify-content:center;
+  flex-wrap:wrap;
+  animation:ctaSlide 1s ease-out 0.9s both;
+}
+
+@keyframes ctaSlide{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.btn-hero-primary{
+  background:var(--white);
+  color:var(--primary);
+ font-size:1.1rem;
+ padding:1rem 2.5rem;
+ font-weight:600;
+  box-shadow:0 10px 40px rgba(0,0,0,0.3);
+ border-radius:var(--radius-full);
+ transition:all 0.3s ease;
+}
+
+.btn-hero-primary:hover{
+ transform:translateY(-3px);
+  box-shadow:0 15px 50px rgba(0,0,0,0.4);
+}
+
+.btn-hero-secondary{
+  background:transparent;
+  color:var(--white);
+ border:2px solid var(--white);
+ font-size:1.1rem;
+ padding:1rem 2.5rem;
+ font-weight:600;
+ border-radius:var(--radius-full);
+ transition:all 0.3s ease;
+}
+
+.btn-hero-secondary:hover{
+  background:var(--white);
+  color:var(--primary);
+ transform:translateY(-3px);
+}
+
+/* Por Qué Elegirnos */
+.why-choose-us{
+  padding:var(--spacing-2xl) 0;
+ background:var(--white);
+}
+
+.section-title{
+ font-size:2.5rem;
+  text-align:center;
+  margin-bottom:var(--spacing-md);
+ color:var(--gray-900);
+  font-weight:900;
+}
+
+.section-subtitle{
+  text-align:center;
+ font-size:1.1rem;
+  color:var(--gray-600);
+  margin-bottom:var(--spacing-2xl);
+ font-weight:300;
+}
+
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:var(--spacing-xl);
+  margin-top:var(--spacing-2xl);
+}
+
+.feature-card{
+  background:var(--white);
+  padding:var(--spacing-2xl);
+  border-radius:var(--radius-2xl);
+  text-align:center;
+ box-shadow:0 4px 6px rgba(0,0,0,0.05);
+ border:2px solid var(--gray-100);
+  transition:all var(--transition-base);
+  position:relative;
+  overflow:hidden;
+}
+
+.feature-card:hover{
+ transform:translateY(-10px);
+ box-shadow:0 10px 25px rgba(211,47,47,0.15);
+  border-color:var(--primary);
+}
+
+.feature-icon{
+ font-size:3rem;
+  margin-bottom:var(--spacing-lg);
+}
+
+.feature-card h3{
+  font-size:1.5rem;
+  margin-bottom:var(--spacing-md);
+  color:var(--gray-900);
+  font-weight:700;
+}
+
+.feature-card p{
+  color:var(--gray-600);
+  line-height:1.8;
+ font-size:0.95rem;
+}
+
+/* Galería de Platos */
+.featured-dishes{
+  padding:var(--spacing-2xl) 0;
+ background:var(--gray-50);
+}
+
+.dishes-showcase{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+  gap:var(--spacing-xl);
+  margin-top:var(--spacing-2xl);
+}
+
+.dish-showcase-item{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--radius-2xl);
+ box-shadow:0 4px 15px rgba(0,0,0,0.1);
+  transition:all var(--transition-base);
+ background:var(--white);
+}
+
+.dish-showcase-item:hover{
+ transform:translateY(-10px);
+ box-shadow:0 20px 40px rgba(0,0,0,0.15);
+}
+
+.dish-image-wrapper{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--radius-2xl);
+}
+
+.dish-image-wrapper img{
+  width:100%;
+  height:400px;
+  object-fit:cover;
+  transition:transform var(--transition-slow);
+}
+
+.dish-showcase-item:hover .dish-image-wrapper img{
+ transform:scale(1.1);
+}
+
+.dish-overlay{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,transparent 100%);
+  padding:var(--spacing-xl);
+ transform:translateY(0);
+ opacity:1;
+  transition:all var(--transition-base);
+}
+
+.dish-info h3{
+  font-size:1.8rem;
+  margin-bottom:var(--spacing-sm);
+  color:var(--white);
+  font-weight:700;
+}
+
+.dish-info p{
+  color:var(--gray-300);
+  margin-bottom:var(--spacing-md);
+  font-size:1rem;
+}
+
+.dish-price{
+  display:block;
+  font-size:2rem;
+  font-weight:800;
+  color:var(--secondary);
+  margin-bottom:var(--spacing-md);
+}
+
+/* Testimonios */
+.testimonials{
+  padding:var(--spacing-2xl) 0;
+ background:var(--white);
+}
+
+.testimonials-slider{
+  position:relative;
+  max-width:800px;
+  margin:var(--spacing-2xl) auto;
+  min-height:300px;
+}
+
+.testimonial-card{
+  background:var(--white);
+  padding:var(--spacing-2xl);
+  border-radius:var(--radius-2xl);
+ box-shadow:0 4px 15px rgba(0,0,0,0.08);
+ border:2px solid var(--gray-100);
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  opacity:0;
+  transform:scale(0.8);
+  transition:all var(--transition-base);
+  pointer-events:none;
+}
+
+.testimonial-card.active{
+  opacity:1;
+  transform:scale(1);
+  position:relative;
+  pointer-events:auto;
+}
+
+.testimonial-rating{
+  font-size:1.5rem;
+  margin-bottom:var(--spacing-lg);
+  text-align:center;
+}
+
+.testimonial-text{
+  font-size:1.2rem;
+  line-height:1.8;
+  color:var(--gray-700);
+  font-style:italic;
+  margin-bottom:var(--spacing-xl);
+  text-align:center;
+}
+
+.testimonial-author{
+  display:flex;
+  align-items:center;
+  gap:var(--spacing-lg);
+  justify-content:center;
+}
+
+.author-avatar{
+  width:60px;
+  height:60px;
+  border-radius:var(--radius-full);
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2rem;
+  box-shadow:var(--shadow-lg);
+}
+
+.author-name{
+  font-weight:700;
+  color:var(--gray-900);
+  font-size:1.1rem;
+}
+
+.author-role{
+  color:var(--gray-600);
+  font-size:0.95rem;
+}
+
+.testimonial-controls{
+  display:flex;
+  gap:var(--spacing-md);
+  justify-content:center;
+  margin-top:var(--spacing-xl);
+}
+
+.testimonial-btn{
+  width:50px;
+  height:50px;
+  border-radius:var(--radius-full);
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:var(--white);
+  border:none;
+  font-size:1.5rem;
+  cursor:pointer;
+  transition:all var(--transition-base);
+  box-shadow:var(--shadow-md);
+}
+
+.testimonial-btn:hover{
+  transform:scale(1.1);
+  box-shadow:var(--shadow-xl);
+}
+
+/* CTA Section */
+.cta-section{
+  padding:var(--spacing-2xl) 0;
+  background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
+  color:var(--white);
+  text-align:center;
+}
+
+.cta-content h2{
+ font-size:2.5rem;
+  margin-bottom:var(--spacing-lg);
+  font-weight:900;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+
+.cta-content p{
+ font-size:1.1rem;
+  margin-bottom:var(--spacing-2xl);
+  opacity:0.95;
+ font-weight:300;
+}
+
+.cta-buttons{
+  display:flex;
+  gap:var(--spacing-lg);
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.btn-large{
+ font-size:1.1rem;
+ padding:1rem 2.5rem;
+  border-radius:var(--radius-full);
+  font-weight:600;
+ transition:all 0.3s ease;
+}
+
+.btn-large:hover{
+ transform:translateY(-3px);
+}
+
+.btn-outline{
+ background:transparent;
+ border:2px solid var(--white);
+ color:var(--white);
+}
+
+.btn-outline:hover{
+ background:var(--white);
+ color:var(--primary);
+}
+
+/* Contact Info Home */
+.contact-info-home{
+ padding:calc(var(--spacing-2xl) * 1.5) 0;
+  background:var(--white);
+}
+
+.contact-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:var(--spacing-xl);
+}
+
+.contact-item{
+  text-align:center;
+ padding:var(--spacing-2xl);
+ background:var(--white);
+  border-radius:var(--radius-xl);
+ border:2px solid var(--gray-100);
+  transition:all var(--transition-base);
+}
+
+.contact-item:hover{
+ transform:translateY(-8px);
+ box-shadow:0 10px 25px rgba(0,0,0,0.08);
+ border-color:var(--primary);
+}
+
+.contact-icon{
+ font-size:2.5rem;
+  margin-bottom:var(--spacing-md);
+}
+
+.contact-item h3{
+  font-size:1.3rem;
+  margin-bottom:var(--spacing-sm);
+  color:var(--gray-900);
+  font-weight:700;
+}
+
+.contact-item p{
+  color:var(--gray-700);
+  line-height:1.6;
+ font-size:0.95rem;
+}
+
+.contact-item a{
+  color:var(--primary);
+  text-decoration:none;
+  font-weight:600;
+  transition:color var(--transition-base);
+}
+
+.contact-item a:hover{
+  color:var(--secondary);
+ text-decoration:underline;
+}
+
+/* Responsive para Landing */
+@media(max-width:768px){
+  .hero-fullscreen{height:80vh;min-height:500px}
+  .hero-bg{background-position:50% 25%}
+ .hero-title{font-size:2.5rem;letter-spacing:0.02em}
+ .hero-subtitle{font-size:1rem}
+  .hero-cta{flex-direction:column;align-items:stretch}
+ .btn-hero-primary,.btn-hero-secondary{font-size:1rem;padding:0.9rem 2rem}
+  .section-title{font-size:2rem}
+  .section-subtitle{font-size:1.1rem}
+  .features-grid{grid-template-columns:1fr}
+  .dishes-showcase{grid-template-columns:1fr}
+  .cta-content h2{font-size:2rem}
+  .contact-grid{grid-template-columns:1fr}
+ .dish-image-wrapper img{height:300px}
+}
+
+@media(max-width:480px){
+ .hero-title{font-size:2rem}
+ .hero-subtitle{font-size:0.9rem}
+ .section-title{font-size:1.5rem}
+ .feature-card{padding:var(--spacing-lg)}
+ .feature-icon{font-size:2.5rem}
+}

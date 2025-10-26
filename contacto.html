@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contacto - CHIFA ALI</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">CHIFA ALI</h1>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="main-nav" id="mainNav">
+        <a href="index.html">Inicio</a>
+        <a href="menu.html">Menú</a>
+        <a href="reservas.html">Reservas</a>
+        <a href="contacto.html" class="active">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="contact-section">
+      <h2>Contacto</h2>
+      <div class="contact-layout">
+        <div>
+          <iframe class="map-embed" loading="lazy" allowfullscreen
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.863783390896!2d-77.075!3d-12.056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105cf4690f00001%3A0x0000000000000000!2sAv.%20Colonial%201234!5e0!3m2!1ses-419!2spe!4v1700000000000">
+          </iframe>
+          <div class="contact-info" style="margin-top:1rem; display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:1rem;">
+            <div class="contact-card"><h3>📍 Dirección</h3><p>Av. Colonial 1234<br>Lima, Perú</p></div>
+            <div class="contact-card"><h3>📞 Teléfono</h3><p><a href="tel:+51997077781">+51 997 077 781</a></p></div>
+            <div class="contact-card"><h3>✉️ Email</h3><p><a href="mailto:contacto@chifaali.com">contacto@chifaali.com</a></p></div>
+            <div class="contact-card"><h3>🕐 Horario</h3><p>Lun-Dom: 12:00 PM - 11:00 PM</p></div>
+          </div>
+        </div>
+        <div class="contact-card contact-form">
+          <h3>Escríbenos</h3>
+          <form id="contactForm" action="mailto:contacto@chifaali.com" method="post" enctype="text/plain">
+            <div class="form-group">
+              <label for="cname">Nombre</label>
+              <input type="text" id="cname" name="Nombre" required>
+            </div>
+            <div class="form-group">
+              <label for="cemail">Email</label>
+              <input type="email" id="cemail" name="Email" required>
+            </div>
+            <div class="form-group">
+              <label for="cmsg">Mensaje</label>
+              <textarea id="cmsg" name="Mensaje" rows="4" required></textarea>
+            </div>
+            <div class="contact-actions">
+              <button type="submit" class="btn btn-primary">Enviar</button>
+              <a id="waBtn" class="btn btn-whatsapp" target="_blank" href="#">WhatsApp</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">CHIFA ALI © 2025 · Todos los derechos reservados</div>
+  </footer>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Construir enlace de WhatsApp con el formulario
+    const waBtn = document.getElementById('waBtn');
+    const form = document.getElementById('contactForm');
+    if (waBtn && form) {
+      const buildUrl = () => {
+        const name = encodeURIComponent(document.getElementById('cname').value.trim());
+        const email = encodeURIComponent(document.getElementById('cemail').value.trim());
+        const msg = encodeURIComponent(document.getElementById('cmsg').value.trim());
+        const text = `Hola, soy ${name}. Mi correo es ${email}. ${msg}`;
+        const phone = '51997077781';
+        waBtn.href = `https://wa.me/${phone}?text=${text}`;
+      };
+      form.addEventListener('input', buildUrl);
+      buildUrl();
+    }
+  </script>
+</body>
+</html>
