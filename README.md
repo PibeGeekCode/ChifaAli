@@ -37,7 +37,7 @@ Sistema completo de reservas para restaurante chifa, con gestión de mesas, pre-
 ## 📁 Estructura del Proyecto
 
 ```
-chifaali_clone/
+ChifaAli/
 ├── index.html          # Landing page ultra impactante
 ├── menu.html           # Menú con platos
 ├── reservas.html       # Formulario de reservas
@@ -59,29 +59,9 @@ chifaali_clone/
 ## 🔧 Instalación y Uso
 
 ### Requisitos
-- Navegador web moderno (Chrome, Firefox, Edge)
+- Navegador web (Chrome, Firefox, Edge)
 - Servidor web local (Python, Node.js, o extensión Live Server de VS Code)
 
-### Opción 1: Servidor Python (recomendado)
-
-```powershell
-cd chifaali_clone
-python -m http.server 8000
-```
-
-Luego abre: http://localhost:8000
-
-### Opción 2: Live Server en VS Code
-1. Instala la extensión "Live Server"
-2. Click derecho en `index.html` → "Open with Live Server"
-
-### Opción 3: Node.js con http-server
-
-```powershell
-npm install -g http-server
-cd chifaali_clone
-http-server -p 8000
-```
 
 ## 🔐 Credenciales de Administrador
 
@@ -101,22 +81,3 @@ Y **sessionStorage** para:
 - Carrito temporal de platos durante la reserva
 
 **Nota**: Los datos se mantienen localmente en el navegador. Para producción, considera implementar un backend (Node.js + MongoDB/PostgreSQL).
-
-## 🗂️ Configuración de Mesas
-
-El sistema incluye 10 mesas con diferentes capacidades:
-
-| Mesa | Capacidad |
-|------|-----------|
-| 1-2  | 2 personas |
-| 3-5  | 4 personas |
-| 6-7  | 6 personas |
-| 8    | 8 personas |
-| 9    | 10 personas |
-| 10   | 12 personas |
-
-Las mesas se asignan automáticamente según:
-1. Disponibilidad en fecha/hora seleccionada
-2. Capacidad mínima para el número de personas
-
-**CHIFA ALI** © 2025 · Sistema desarrollado con ❤️
