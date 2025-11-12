@@ -22,6 +22,24 @@ const TABLES = [
 let currentFilters = { date: '', status: 'all' };
 let selectedReservationId = null;
 
+// --- Supabase client init (opcional) ---
+function initSupabaseClient() {
+  if (!window.supabaseClient && window.SUPABASE) {
+    try {
+      if (typeof supabase !== 'undefined' && supabase.createClient) {
+        window.supabaseClient = supabase.createClient(window.SUPABASE.url, window.SUPABASE.anonKey);
+        if (window.DEBUG) console.log('Supabase client initialized in admin');
+      } else {
+        if (window.DEBUG) console.warn('Supabase library not loaded in admin');
+      }
+    } catch (e) {
+      console.error('Supabase init failed in admin:', e.message || e);
+    }
+  } else if (!window.SUPABASE) {
+    if (window.DEBUG) console.warn('window.SUPABASE config not found in admin');
+  }
+}
+
 // Obtener reservas
 function getReservations() {
   return JSON.parse(localStorage.getItem('reservations') || '[]');
@@ -30,6 +48,18 @@ function getReservations() {
 // Guardar reservas
 function saveReservations(reservations) {
   localStorage.setItem('reservations', JSON.stringify(reservations));
+  // Intentar sincronizar con Supabase en background si está configurado
+  if (window.SUPABASE && window.supabaseClient) {
+    try {
+      reservations.forEach(r => {
+        window.supabaseClient.from('reservations').upsert(r, { onConflict: 'id' }).catch(err => {
+          console.warn('Supabase upsert failed (admin)', r.id, err.message || err);
+        });
+      });
+    } catch (err) {
+      console.warn('Supabase admin sync error', err.message || err);
+    }
+  }
 }
 
 // Verificar autenticación
@@ -290,6 +320,12 @@ function updateReservationStatus(id, status) {
     saveReservations(reservations);
     closeDetailModal();
     loadDashboard();
+    // Si hay supabase, actualizar registro remoto
+    if (window.supabaseClient) {
+      window.supabaseClient.from('reservations').upsert(reservations[index], { onConflict: 'id' }).then(({ error }) => {
+        if (error) console.warn('Supabase status update failed', error.message || error);
+      }).catch(e => console.warn('Supabase error', e));
+    }
   }
 }
 
@@ -301,6 +337,12 @@ function deleteReservation(id) {
   const filtered = reservations.filter(r => r.id !== id);
   saveReservations(filtered);
   loadDashboard();
+  // También intentar borrar en Supabase (opcional)
+  if (window.supabaseClient) {
+    window.supabaseClient.from('reservations').delete().eq('id', id).then(({ error }) => {
+      if (error) console.warn('Supabase delete failed', error.message || error);
+    }).catch(e => console.warn('Supabase delete error', e));
+  }
 }
 
 // Cerrar modal de detalle
@@ -311,6 +353,9 @@ function closeDetailModal() {
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar cliente Supabase
+  initSupabaseClient();
+  
   checkAuth();
   
   // Event listeners

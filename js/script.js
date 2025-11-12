@@ -1,4 +1,7 @@
 // Script principal con menú hamburguesa responsive
+// Flag global para controlar logs verbosos en otros módulos (reservations.js, admin.js)
+// Establecer a true en desarrollo si deseas ver más información en la consola.
+window.DEBUG = window.DEBUG === undefined ? false : window.DEBUG;
 
 // Toggle menú móvil
 document.addEventListener('DOMContentLoaded', function() {

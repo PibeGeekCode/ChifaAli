@@ -81,3 +81,50 @@ Y **sessionStorage** para:
 - Carrito temporal de platos durante la reserva
 
 **Nota**: Los datos se mantienen localmente en el navegador. Para producción, considera implementar un backend (Node.js + MongoDB/PostgreSQL).
+
+## 🔗 Opcional: Sincronizar con Supabase (Paso rápido)
+
+Si quieres que las reservas se persistan en una base de datos real puedes usar Supabase. La integración incluida en este repo es opcional y mantiene localStorage como fallback.
+
+### Pasos para activar Supabase:
+
+1. **Crea un proyecto en Supabase**
+   - Ve a https://app.supabase.com y crea un nuevo proyecto
+   - Copia tu Project URL y anon/public key
+
+2. **Crea la tabla en Supabase**
+   - Ve a SQL Editor en tu dashboard de Supabase
+   - Ejecuta el script completo que está en `supabase-schema.sql`
+   - Esto creará la tabla `reservations` con índices y políticas RLS básicas
+
+3. **Configura las credenciales**
+   - Ya tienes tu archivo `js/supabase-config.js` con tus credenciales
+   - Los scripts de Supabase ya están incluidos en `reservas.html` y `admin.html`
+
+4. **¡Listo!** 
+   - Abre tu aplicación (con Live Server o Python HTTP server)
+   - Las reservas se guardarán automáticamente tanto en localStorage como en Supabase
+   - Revisa la consola del navegador (F12) para ver logs de sincronización
+
+### ✅ Qué hace la integración:
+
+- **Sincronización automática**: Cada vez que se crea, actualiza o elimina una reserva, se sincroniza con Supabase
+- **Fallback local**: Si Supabase no está disponible, todo sigue funcionando con localStorage
+- **Sin cambios en UX**: La experiencia del usuario no cambia, la sincronización es transparente
+
+### ⚠️ Notas de seguridad:
+
+La configuración actual usa políticas RLS muy permisivas (apropiadas para desarrollo/demo). 
+
+**Para producción, deberías**:
+- Implementar autenticación en Supabase (Auth)
+- Restringir las políticas RLS para que solo usuarios autenticados puedan modificar/eliminar
+- Mover operaciones administrativas sensibles a funciones Edge/Serverless con la service_role key
+- NO exponer la service_role key en el cliente
+
+### 🔍 Verificar que funciona:
+
+1. Abre las DevTools (F12) → pestaña Console
+2. Haz una reserva de prueba
+3. Deberías ver: `Supabase upsert...` sin errores
+4. Ve a Supabase → Table Editor → `reservations` y verifica que aparece el registro

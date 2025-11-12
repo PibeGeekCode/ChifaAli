@@ -127,21 +127,6 @@ function parallaxHero() {
   }
 }
 
-// Smooth scroll para enlaces internos
-function setupSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    });
-  });
-}
 
 // Scroll indicator
 function updateScrollIndicator() {
@@ -177,9 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Configurar reveal animations
   initRevealStyles();
   revealOnScroll();
-  
-  // Smooth scroll
-  setupSmoothScroll();
 });
 
 // Scroll events

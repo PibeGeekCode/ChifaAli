@@ -16,12 +16,92 @@ const TABLES = [
 
 // Obtener reservas del localStorage
 function getReservations() {
+  // Si hay configuración de Supabase, intentaremos obtener datos desde allí primero
+  if (window.SUPABASE && window.supabaseClient) {
+    // NOTE: esta llamada es síncrona en este helper para no romper llamadas actuales.
+    // Para: compatibilidad simple, primero revisamos localStorage (cache) y devolvemos eso.
+    return JSON.parse(localStorage.getItem('reservations') || '[]');
+  }
   return JSON.parse(localStorage.getItem('reservations') || '[]');
 }
 
 // Guardar reservas en localStorage
 function saveReservations(reservations) {
   localStorage.setItem('reservations', JSON.stringify(reservations));
+  if (window.DEBUG) console.log('Saved to localStorage:', reservations.length, 'reservations');
+  
+  // Intentar sincronizar con Supabase en background si está configurado
+  if (window.SUPABASE && window.supabaseClient) {
+    if (window.DEBUG) console.log('Attempting Supabase sync...');
+    try {
+      // Subir cada reserva (upsert por id)
+      reservations.forEach(res => {
+        upsertReservationToSupabase(res).catch(err => {
+          // No interrumpimos el flujo por errores de red
+          console.error('Supabase upsert failed for reservation', res.id, err.message || err);
+        });
+      });
+    } catch (err) {
+      console.error('Supabase sync error', err.message || err);
+    }
+  } else {
+    if (!window.SUPABASE) {
+      if (window.DEBUG) console.warn('Supabase not configured - only localStorage active');
+    } else if (!window.supabaseClient) {
+      if (window.DEBUG) console.warn('Supabase client not initialized - only localStorage active');
+    }
+  }
+}
+
+// --- Supabase helpers (opcional) ---
+// Función para inicializar Supabase client
+function initSupabaseClient() {
+  if (!window.supabaseClient && window.SUPABASE) {
+    try {
+      // Initialize supabase client con la librería v2
+      if (typeof supabase !== 'undefined' && supabase.createClient) {
+        window.supabaseClient = supabase.createClient(window.SUPABASE.url, window.SUPABASE.anonKey);
+        if (window.DEBUG) console.log('Supabase client initialized successfully');
+      } else {
+        if (window.DEBUG) console.warn('Supabase library not loaded. Make sure CDN script is included.');
+      }
+    } catch (e) {
+      console.error('Supabase init failed:', e.message || e);
+    }
+  } else if (!window.SUPABASE) {
+    if (window.DEBUG) console.warn('window.SUPABASE config not found. Check js/supabase-config.js');
+  }
+}
+
+async function fetchReservationsFromSupabase() {
+  if (!window.supabaseClient) return [];
+  try {
+    const { data, error } = await window.supabaseClient.from('reservations').select('*');
+    if (error) throw error;
+    if (window.DEBUG) console.log('Fetched from Supabase:', data?.length || 0, 'reservations');
+    return data || [];
+  } catch (err) {
+    console.error('Fetch reservations from Supabase failed:', err.message || err);
+    return [];
+  }
+}
+
+async function upsertReservationToSupabase(reservation) {
+  if (!window.supabaseClient) {
+    if (window.DEBUG) console.warn('Supabase client not initialized, skipping upsert');
+    return;
+  }
+  try {
+    const payload = Object.assign({}, reservation, { dishes: reservation.dishes || [] });
+    if (window.DEBUG) console.log('Upserting to Supabase:', payload.id);
+    const { data, error } = await window.supabaseClient.from('reservations').upsert(payload, { onConflict: 'id' });
+    if (error) throw error;
+    if (window.DEBUG) console.log('Upsert successful for reservation:', payload.id);
+    return data;
+  } catch (err) {
+    console.error('Upsert failed for reservation:', reservation.id, err.message || err);
+    throw err;
+  }
 }
 
 // Obtener platos reservados del sessionStorage
@@ -142,11 +222,17 @@ function showModal(title, message, onClose) {
   const closeBtn = () => {
     modal.style.display = 'none';
     if (onClose) onClose();
+    // limpiar listeners
+    document.querySelectorAll('.close').forEach(btn => btn.removeEventListener('click', closeBtn));
+    document.getElementById('modalBtn').removeEventListener('click', closeBtn);
+    window.removeEventListener('click', outsideClickHandler);
   };
-  
-  document.querySelector('.close').onclick = closeBtn;
-  document.getElementById('modalBtn').onclick = closeBtn;
-  window.onclick = (e) => { if (e.target === modal) closeBtn(); };
+
+  const outsideClickHandler = (e) => { if (e.target === modal) closeBtn(); };
+
+  document.querySelectorAll('.close').forEach(btn => btn.addEventListener('click', closeBtn));
+  document.getElementById('modalBtn').addEventListener('click', closeBtn);
+  window.addEventListener('click', outsideClickHandler);
 }
 
 // Procesar reserva
@@ -234,6 +320,9 @@ function setMinDate() {
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar cliente Supabase
+  initSupabaseClient();
+  
   setMinDate();
 
   // Cargar borrador de reserva (si existe)
