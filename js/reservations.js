@@ -288,7 +288,7 @@ function handleReservation(e) {
     `\n\n📱 Mi teléfono: ${reservation.phone}`
   );
   
-  const restaurantPhone = '51997077781'; // Número del restaurante
+  const restaurantPhone = '997077781'; // Número del restaurante
   const whatsappUrl = `https://wa.me/${restaurantPhone}?text=${whatsappMessage}`;
   
   // Limpiar sessionStorage
