@@ -19,7 +19,7 @@ const TABLES = [
 ];
 
 // Estado global
-let currentFilters = { date: '', status: 'all' };
+let currentFilters = { date: '', status: 'all', released: 'all' };
 let selectedReservationId = null;
 
 // --- Supabase client init (opcional) ---
@@ -178,8 +178,9 @@ function renderTableMap() {
 async function applyFilters() {
   const dateFilter = document.getElementById('filterDate').value;
   const statusFilter = document.getElementById('filterStatus').value;
+  const releasedFilter = document.getElementById('filterReleased').value;
   
-  currentFilters = { date: dateFilter, status: statusFilter };
+  currentFilters = { date: dateFilter, status: statusFilter, released: releasedFilter };
   await fetchReservations(); // Refrescar datos antes de filtrar
   renderReservationsTable();
   renderTableMap();
@@ -189,7 +190,8 @@ async function applyFilters() {
 async function clearFilters() {
   document.getElementById('filterDate').value = '';
   document.getElementById('filterStatus').value = 'all';
-  currentFilters = { date: '', status: 'all' };
+  document.getElementById('filterReleased').value = 'all';
+  currentFilters = { date: '', status: 'all', released: 'all' };
   await fetchReservations(); // Refrescar datos
   renderReservationsTable();
   renderTableMap();
@@ -207,6 +209,11 @@ function renderReservationsTable() {
   if (currentFilters.status !== 'all') {
     filtered = filtered.filter(r => r.status === currentFilters.status);
   }
+  if (currentFilters.released === 'active') {
+    filtered = filtered.filter(r => r.status === 'confirmed' && !r.releasedAt);
+  } else if (currentFilters.released === 'released') {
+    filtered = filtered.filter(r => r.releasedAt);
+  }
   
   // Ordenar por fecha/hora más reciente
   filtered.sort((a, b) => {
@@ -218,7 +225,7 @@ function renderReservationsTable() {
   const tbody = document.getElementById('reservationsBody');
   
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:#666">No hay reservas que coincidan con los filtros</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:#666">No hay reservas que coincidan con los filtros</td></tr>';
     return;
   }
   
@@ -236,6 +243,15 @@ function renderReservationsTable() {
       statusText = 'Cancelada';
     }
     
+    // Estado de atención
+    let attentionBadge = '<span style="color:#999;font-size:0.85rem">-</span>';
+    if (r.status === 'confirmed' && r.releasedAt) {
+      const releasedDate = new Date(r.releasedAt).toLocaleString('es-PE', { hour: '2-digit', minute: '2-digit' });
+      attentionBadge = `<span class="status-badge" style="background:#28a745;color:#fff">✓ Atendida<br><small style="font-size:0.75rem">${releasedDate}</small></span>`;
+    } else if (r.status === 'confirmed' && !r.releasedAt) {
+      attentionBadge = '<span class="status-badge" style="background:#ffc107;color:#333">⏳ Activa</span>';
+    }
+    
     return `
       <tr>
         <td>#${r.id.slice(-6)}</td>
@@ -246,6 +262,7 @@ function renderReservationsTable() {
         <td>${r.tableName}</td>
         <td>${dishesText}</td>
         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        <td>${attentionBadge}</td>
         <td>
           <div class="action-buttons">
             <button class="action-btn action-btn-view" onclick="viewReservation('${r.id}')">Ver</button>
@@ -287,6 +304,8 @@ function viewReservation(id) {
     ${totalDishes > 0 ? `<p><strong>Total platos:</strong> S/ ${totalDishes.toFixed(2)}</p>` : ''}
     <p><strong>Notas:</strong> ${reservation.notes || 'Ninguna'}</p>
     <p style="font-size:0.85rem;color:#666"><strong>Creada:</strong> ${new Date(reservation.createdAt).toLocaleString('es-PE')}</p>
+    ${reservation.releasedAt ? `<p style="font-size:0.85rem;color:#28a745;font-weight:bold"><strong>✓ Mesa liberada:</strong> ${new Date(reservation.releasedAt).toLocaleString('es-PE')}</p>` : ''}
+    ${reservation.status === 'cancelled' && reservation.cancellationReason ? `<p style="font-size:0.9rem;color:#dc3545;background:#fff3cd;padding:0.5rem;border-left:3px solid #dc3545;margin-top:0.5rem"><strong>❌ Cancelada:</strong> ${new Date(reservation.cancelledAt || reservation.createdAt).toLocaleString('es-PE')}<br><strong>Motivo:</strong> ${reservation.cancellationReason}</p>` : ''}
   `;
   
   document.getElementById('reservationDetail').innerHTML = detailHTML;
@@ -297,23 +316,25 @@ function viewReservation(id) {
   const cancelBtn = document.getElementById('cancelReservation');
   const releaseBtn = document.getElementById('releaseReservation');
   
-  if (reservation.status === 'confirmed') {
+  // Deshabilitar confirmar si ya está confirmada O cancelada
+  if (reservation.status === 'confirmed' || reservation.status === 'cancelled') {
     confirmBtn.disabled = true;
     confirmBtn.style.opacity = '0.5';
-    // Mostrar liberar si activo y no liberado
-    if (reservation.active && !reservation.releasedAt) {
-      releaseBtn.style.display = 'inline-block';
-      releaseBtn.disabled = false;
-    } else {
-      releaseBtn.style.display = 'none';
-    }
   } else {
     confirmBtn.disabled = false;
     confirmBtn.style.opacity = '1';
+  }
+  
+  // Mostrar liberar solo si está confirmada y no liberada
+  if (reservation.status === 'confirmed' && !reservation.releasedAt) {
+    releaseBtn.style.display = 'inline-block';
+    releaseBtn.disabled = false;
+  } else {
     releaseBtn.style.display = 'none';
   }
   
-  if (reservation.status === 'cancelled') {
+  // Deshabilitar cancelar si ya está cancelada O si fue liberada (atendida)
+  if (reservation.status === 'cancelled' || reservation.releasedAt) {
     cancelBtn.disabled = true;
     cancelBtn.style.opacity = '0.5';
   } else {
@@ -338,8 +359,69 @@ function confirmReservation() {
 }
 
 // Cancelar reserva
-function cancelReservation() {
-  updateReservationStatus(selectedReservationId, 'cancelled');
+async function cancelReservation() {
+  if (!selectedReservationId) return;
+  
+  const reservations = getReservations();
+  const reservation = reservations.find(r => r.id === selectedReservationId);
+  
+  if (!reservation) return;
+  
+  // Confirmar cancelación
+  const reason = prompt('¿Por qué motivo se cancela esta reserva?\n(El cliente recibirá esta información por WhatsApp)');
+  
+  if (reason === null) return; // Usuario canceló el prompt
+  
+  const cancellationReason = reason.trim() || 'No especificado';
+  
+  // Construir mensaje de WhatsApp
+  const mensaje = encodeURIComponent(
+    `Hola ${reservation.name},\n\n` +
+    `Lamentamos informarte que tu reserva ha sido cancelada:\n\n` +
+    `📅 Fecha: ${reservation.date}\n` +
+    `🕐 Hora: ${reservation.time}\n` +
+    `👥 Personas: ${reservation.guests}\n` +
+    `🪑 ${reservation.tableName}\n\n` +
+    `*Motivo:* ${cancellationReason}\n\n` +
+    `Disculpa las molestias. Puedes hacer una nueva reserva en otro horario.\n\n` +
+    `Saludos,\nCHIFA ALI`
+  );
+  
+  const whatsappUrl = `https://wa.me/51${reservation.phone}?text=${mensaje}`;
+  
+  // Abrir WhatsApp
+  window.open(whatsappUrl, '_blank');
+  
+  // Actualizar estado con motivo de cancelación
+  const index = reservations.findIndex(r => r.id === selectedReservationId);
+  if (index !== -1) {
+    reservations[index].status = 'cancelled';
+    reservations[index].cancellationReason = cancellationReason;
+    reservations[index].cancelledAt = new Date().toISOString();
+    
+    // Actualizar en Supabase
+    if (window.supabaseClient) {
+      try {
+        const { error } = await window.supabaseClient
+          .from('reservations')
+          .update({ 
+            status: 'cancelled',
+            cancellationReason: cancellationReason,
+            cancelledAt: reservations[index].cancelledAt
+          })
+          .eq('id', selectedReservationId);
+        if (error) throw error;
+        console.log('Cancellation reason saved to Supabase');
+      } catch (e) {
+        console.error('Supabase update failed', e.message || e);
+      }
+    }
+    
+    // Actualizar localStorage
+    saveReservations(reservations);
+    closeDetailModal();
+    await loadDashboard();
+  }
 }
 
 // Actualizar estado de reserva
@@ -436,6 +518,150 @@ function closeDetailModal() {
   selectedReservationId = null;
 }
 
+// Mostrar modal de estadísticas
+function showStatsModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('statsDate').value = today;
+  document.getElementById('statsModal').style.display = 'block';
+  renderStats(today);
+}
+
+// Cerrar modal de estadísticas
+function closeStatsModal() {
+  document.getElementById('statsModal').style.display = 'none';
+}
+
+// Renderizar estadísticas
+function renderStats(date) {
+  const reservations = getReservations();
+  const filtered = reservations.filter(r => r.date === date);
+  
+  // Contar por estados
+  const pending = filtered.filter(r => r.status === 'pending').length;
+  const confirmed = filtered.filter(r => r.status === 'confirmed').length;
+  const cancelled = filtered.filter(r => r.status === 'cancelled').length;
+  const released = filtered.filter(r => r.releasedAt).length;
+  const active = filtered.filter(r => r.status === 'confirmed' && !r.releasedAt).length;
+  
+  // Total de personas
+  const totalGuests = filtered.reduce((sum, r) => r.status !== 'cancelled' ? sum + r.guests : sum, 0);
+  
+  // Platos pre-ordenados
+  const totalDishes = filtered.reduce((sum, r) => {
+    if (r.status !== 'cancelled' && r.dishes) {
+      return sum + r.dishes.reduce((s, d) => s + d.quantity, 0);
+    }
+    return sum;
+  }, 0);
+  
+  const totalRevenue = filtered.reduce((sum, r) => {
+    if (r.status !== 'cancelled' && r.dishes) {
+      return sum + r.dishes.reduce((s, d) => s + (d.price * d.quantity), 0);
+    }
+    return sum;
+  }, 0);
+  
+  // Calcular porcentajes para barras
+  const total = filtered.length || 1;
+  const pendingPct = (pending / total * 100).toFixed(1);
+  const confirmedPct = (confirmed / total * 100).toFixed(1);
+  const cancelledPct = (cancelled / total * 100).toFixed(1);
+  const releasedPct = (released / total * 100).toFixed(1);
+  const activePct = (active / total * 100).toFixed(1);
+  
+  const statsHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem">
+      <div class="stat-card" style="background:#fff3cd">
+        <h3>⏳ Pendientes</h3>
+        <p class="stat-value">${pending}</p>
+      </div>
+      <div class="stat-card" style="background:#d1ecf1">
+        <h3>✅ Confirmadas</h3>
+        <p class="stat-value">${confirmed}</p>
+      </div>
+      <div class="stat-card" style="background:#f8d7da">
+        <h3>❌ Canceladas</h3>
+        <p class="stat-value">${cancelled}</p>
+      </div>
+      <div class="stat-card" style="background:#d4edda">
+        <h3>✓ Atendidas</h3>
+        <p class="stat-value">${released}</p>
+      </div>
+      <div class="stat-card" style="background:#ffc107">
+        <h3>⏱ Activas</h3>
+        <p class="stat-value">${active}</p>
+      </div>
+    </div>
+    
+    <div style="background:#f8f9fa;padding:1.5rem;border-radius:8px;margin-bottom:1.5rem">
+      <h4 style="margin-top:0">Distribución de Estados</h4>
+      <div style="margin:1rem 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+          <span>Pendientes</span><span>${pending} (${pendingPct}%)</span>
+        </div>
+        <div style="background:#e0e0e0;height:20px;border-radius:10px;overflow:hidden">
+          <div style="background:#ffc107;height:100%;width:${pendingPct}%"></div>
+        </div>
+      </div>
+      <div style="margin:1rem 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+          <span>Confirmadas</span><span>${confirmed} (${confirmedPct}%)</span>
+        </div>
+        <div style="background:#e0e0e0;height:20px;border-radius:10px;overflow:hidden">
+          <div style="background:#17a2b8;height:100%;width:${confirmedPct}%"></div>
+        </div>
+      </div>
+      <div style="margin:1rem 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+          <span>Canceladas</span><span>${cancelled} (${cancelledPct}%)</span>
+        </div>
+        <div style="background:#e0e0e0;height:20px;border-radius:10px;overflow:hidden">
+          <div style="background:#dc3545;height:100%;width:${cancelledPct}%"></div>
+        </div>
+      </div>
+      <div style="margin:1rem 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+          <span>Atendidas</span><span>${released} (${releasedPct}%)</span>
+        </div>
+        <div style="background:#e0e0e0;height:20px;border-radius:10px;overflow:hidden">
+          <div style="background:#28a745;height:100%;width:${releasedPct}%"></div>
+        </div>
+      </div>
+      <div style="margin:1rem 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+          <span>Activas (no atendidas)</span><span>${active} (${activePct}%)</span>
+        </div>
+        <div style="background:#e0e0e0;height:20px;border-radius:10px;overflow:hidden">
+          <div style="background:#fd7e14;height:100%;width:${activePct}%"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+      <div style="background:#fff;padding:1rem;border-radius:8px;border:1px solid #ddd">
+        <h4 style="margin-top:0;color:#666">👥 Total Personas</h4>
+        <p style="font-size:2rem;font-weight:bold;margin:0;color:#333">${totalGuests}</p>
+      </div>
+      <div style="background:#fff;padding:1rem;border-radius:8px;border:1px solid #ddd">
+        <h4 style="margin-top:0;color:#666">🍽 Platos Pre-ordenados</h4>
+        <p style="font-size:2rem;font-weight:bold;margin:0;color:#333">${totalDishes}</p>
+      </div>
+      <div style="background:#fff;padding:1rem;border-radius:8px;border:1px solid #ddd">
+        <h4 style="margin-top:0;color:#666">💰 Ingresos Platos</h4>
+        <p style="font-size:2rem;font-weight:bold;margin:0;color:#28a745">S/ ${totalRevenue.toFixed(2)}</p>
+      </div>
+      <div style="background:#fff;padding:1rem;border-radius:8px;border:1px solid #ddd">
+        <h4 style="margin-top:0;color:#666">📋 Total Reservas</h4>
+        <p style="font-size:2rem;font-weight:bold;margin:0;color:#333">${filtered.length}</p>
+      </div>
+    </div>
+    
+    ${filtered.length === 0 ? '<p style="text-align:center;color:#999;margin-top:2rem">No hay reservas para esta fecha</p>' : ''}
+  `;
+  
+  document.getElementById('statsContent').innerHTML = statsHTML;
+}
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   // Inicializar cliente Supabase
@@ -461,6 +687,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('releaseReservation').addEventListener('click', releaseReservation);
   document.getElementById('closeModal').addEventListener('click', closeDetailModal);
   
+  // Modal de estadísticas
+  document.getElementById('statsCard').addEventListener('click', showStatsModal);
+  document.getElementById('closeStatsModal').addEventListener('click', closeStatsModal);
+  document.getElementById('updateStats').addEventListener('click', () => {
+    const date = document.getElementById('statsDate').value;
+    if (date) renderStats(date);
+  });
+  
   // Cerrar modal al hacer clic en X o fuera
   document.querySelectorAll('.close').forEach(btn => {
     btn.addEventListener('click', closeDetailModal);
@@ -468,7 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   window.addEventListener('click', (e) => {
     const modal = document.getElementById('detailModal');
+    const statsModal = document.getElementById('statsModal');
     if (e.target === modal) closeDetailModal();
+    if (e.target === statsModal) closeStatsModal();
   });
   
   // Establecer fecha de hoy en filtro

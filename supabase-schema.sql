@@ -79,4 +79,6 @@ COMMENT ON COLUMN public.reservations."releasedAt" IS 'Momento en que la mesa fu
 -- Alter table safety (para instalaciones existentes)
 ALTER TABLE public.reservations
   ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT false,
-  ADD COLUMN IF NOT EXISTS "releasedAt" TIMESTAMPTZ;
+  ADD COLUMN IF NOT EXISTS "releasedAt" TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS "cancellationReason" TEXT,
+  ADD COLUMN IF NOT EXISTS "cancelledAt" TIMESTAMPTZ;

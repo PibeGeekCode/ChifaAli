@@ -52,6 +52,10 @@
           <h3>Mesas Ocupadas</h3>
           <p class="stat-value" id="occupiedTables">0 / 10</p>
         </div>
+        <div class="stat-card" style="cursor:pointer" id="statsCard" title="Click para ver estadísticas detalladas">
+          <h3>📊 Estadísticas</h3>
+          <p class="stat-value" style="font-size:1rem">Ver detalles</p>
+        </div>
       </div>
 
       <div class="admin-section">
@@ -63,6 +67,11 @@
             <option value="confirmed">Confirmadas</option>
             <option value="pending">Pendientes</option>
             <option value="cancelled">Canceladas</option>
+          </select>
+          <select id="filterReleased" class="filter-input">
+            <option value="all">Todas</option>
+            <option value="active">Activas (No atendidas)</option>
+            <option value="released">Atendidas (Liberadas)</option>
           </select>
           <button id="applyFilters" class="btn btn-small">Aplicar</button>
           <button id="clearFilters" class="btn btn-small btn-secondary">Limpiar</button>
@@ -90,6 +99,7 @@
                 <th>Mesa</th>
                 <th>Platos</th>
                 <th>Estado</th>
+                <th>Atención</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -113,6 +123,19 @@
         <button class="btn btn-warning" id="releaseReservation" style="display:none">Liberar Mesa</button>
         <button class="btn btn-secondary" id="closeModal">Cerrar</button>
       </div>
+    </div>
+  </div>
+
+  <div id="statsModal" class="modal">
+    <div class="modal-content modal-large">
+      <span class="close" id="closeStatsModal">&times;</span>
+      <h3>📊 Estadísticas de Reservas</h3>
+      <div style="margin: 1.5rem 0;">
+        <label for="statsDate" style="margin-right: 0.5rem; font-weight: bold;">Fecha:</label>
+        <input type="date" id="statsDate" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+        <button id="updateStats" class="btn btn-small" style="margin-left: 0.5rem;">Actualizar</button>
+      </div>
+      <div id="statsContent"></div>
     </div>
   </div>
 
