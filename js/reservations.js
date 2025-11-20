@@ -314,7 +314,7 @@ async function handleReservation(e) {
       console.log('Reservation saved to Supabase:', reservation.id);
     } catch (err) {
       console.error('Failed to save reservation to Supabase:', err.message || err);
-      showModal('Error', 'No se pudo guardar la reserva en la base de datos. Intenta nuevamente.');
+      showModal('Error', 'No se pudo guardar la reserva: ' + (err.message || err));
       return;
     }
   } else {
