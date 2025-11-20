@@ -306,7 +306,7 @@ async function handleReservation(e) {
     `\n\n📱 Mi teléfono: ${reservation.phone}`
   );
   
-  const restaurantPhone = '51997077781'; // Número del restaurante
+  const restaurantPhone = '51993133289'; // Número del restaurante
   const whatsappUrl = `https://wa.me/${restaurantPhone}?text=${whatsappMessage}`;
   
   // Limpiar sessionStorage
