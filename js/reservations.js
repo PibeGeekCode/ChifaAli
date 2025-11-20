@@ -213,25 +213,54 @@ function removeDish(dishId) {
 }
 
 // Mostrar modal
-function showModal(title, message, onClose) {
+function showModal(title, message, onClose, whatsappUrl = null) {
   const modal = document.getElementById('modal');
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalMessage').textContent = message;
   modal.style.display = 'block';
+  
+  const modalActions = document.getElementById('modalActions');
+  const modalBtn = document.getElementById('modalBtn');
+  
+  // Limpiar botones anteriores
+  modalActions.innerHTML = '';
+  
+  // Si hay URL de WhatsApp, agregar botón
+  if (whatsappUrl) {
+    const waBtn = document.createElement('a');
+    waBtn.href = whatsappUrl;
+    waBtn.className = 'btn btn-primary';
+    waBtn.textContent = '📱 Abrir WhatsApp';
+    waBtn.style.textDecoration = 'none';
+    waBtn.target = '_blank';
+    modalActions.appendChild(waBtn);
+    
+    const homeBtn = document.createElement('button');
+    homeBtn.className = 'btn btn-secondary';
+    homeBtn.textContent = 'Ir a Inicio';
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+    modalActions.appendChild(homeBtn);
+  } else {
+    // Botón normal
+    modalActions.appendChild(modalBtn);
+    modalBtn.textContent = 'Aceptar';
+  }
   
   const closeBtn = () => {
     modal.style.display = 'none';
     if (onClose) onClose();
     // limpiar listeners
     document.querySelectorAll('.close').forEach(btn => btn.removeEventListener('click', closeBtn));
-    document.getElementById('modalBtn').removeEventListener('click', closeBtn);
+    modalBtn.removeEventListener('click', closeBtn);
     window.removeEventListener('click', outsideClickHandler);
   };
 
   const outsideClickHandler = (e) => { if (e.target === modal) closeBtn(); };
 
   document.querySelectorAll('.close').forEach(btn => btn.addEventListener('click', closeBtn));
-  document.getElementById('modalBtn').addEventListener('click', closeBtn);
+  modalBtn.addEventListener('click', closeBtn);
   window.addEventListener('click', outsideClickHandler);
 }
 
@@ -313,19 +342,30 @@ async function handleReservation(e) {
   sessionStorage.removeItem('reservedDishes');
   clearReservationDraft();
   
-  // Abrir WhatsApp automáticamente
-  window.open(whatsappUrl, '_blank');
-  
-  // Limpiar sessionStorage y mostrar confirmación
+  // Mostrar modal con opción de abrir WhatsApp
   showModal(
-    '✅ ¡Reserva Lista!',
-    `Tu reserva para ${reservation.guests} persona(s) el ${reservation.date} a las ${reservation.time} ha sido registrada.\n\n` +
-    `📱 Se ha abierto WhatsApp con tu mensaje de confirmación listo.\n\n` +
-    `Solo presiona el botón "Enviar" para confirmar con el restaurante.`,
-    () => {
-      window.location.href = 'index.html';
-    }
+    '✅ ¡Reserva Confirmada!',
+    `Tu reserva para ${reservation.guests} persona(s) el ${reservation.date} a las ${reservation.time} ha sido registrada exitosamente.\n\n` +
+    `Presiona el botón "Abrir WhatsApp" para enviar tu confirmación al restaurante.`,
+    null,
+    whatsappUrl
   );
+  
+  // Intentar abrir WhatsApp automáticamente (en segundo plano)
+  setTimeout(() => {
+    try {
+      // En móviles, usar location.href es más confiable
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.location.href = whatsappUrl;
+      } else {
+        // En desktop, abrir en nueva pestaña
+        window.open(whatsappUrl, '_blank');
+      }
+    } catch (e) {
+      console.error('Error opening WhatsApp automatically:', e);
+      // No problem, el usuario puede usar el botón del modal
+    }
+  }, 500); // Pequeño delay para que el modal se muestre primero
 }
 
 // Establecer fecha mínima (hoy)
