@@ -105,6 +105,11 @@ function clearReservationDraft() {
 
 // Verificar disponibilidad de mesas para fecha/hora/cantidad de personas
 async function getAvailableTables(date, time, guests) {
+  const MIN_GAP_MINUTES = 180; // mínimo 3 horas después de reserva anterior
+  function timeToMinutes(t){
+    const [hh,mm] = t.split(':').map(Number); return hh*60+mm;
+  }
+  const requestedMinutes = timeToMinutes(time);
   // Obtener reservas actualizadas desde Supabase
   let reservations = [];
   if (window.supabaseClient) {
@@ -113,7 +118,6 @@ async function getAvailableTables(date, time, guests) {
         .from('reservations')
         .select('*')
         .eq('date', date)
-        .eq('time', time)
         .neq('status', 'cancelled');
       if (error) throw error;
       reservations = data || [];
@@ -125,10 +129,16 @@ async function getAvailableTables(date, time, guests) {
   } else {
     reservations = getReservations();
   }
-  
-  const occupiedTableIds = reservations
-    .filter(r => r.date === date && r.time === time && r.status !== 'cancelled')
-    .map(r => r.tableId);
+  // Mesa ocupada si existe reserva confirmada activa no liberada y la hora solicitada
+  // está dentro de las 3 horas desde el inicio de esa reserva
+  const occupiedTableIds = reservations.filter(r => {
+      if (r.date !== date) return false;
+      if (r.status !== 'confirmed') return false;
+      if (r.active === false || r.releasedAt) return false;
+      const existingStart = timeToMinutes(r.time);
+      // Bloquear si la nueva hora está antes del fin del período de 3h
+      return requestedMinutes < (existingStart + MIN_GAP_MINUTES);
+    }).map(r => r.tableId);
   
   return TABLES.filter(table => 
     !occupiedTableIds.includes(table.id) && table.capacity >= guests
@@ -150,7 +160,7 @@ async function renderTables() {
   const availableTables = await getAvailableTables(date, time, guests);
   
   if (availableTables.length === 0) {
-    tableSelection.innerHTML = '<p class="info-text" style="color:#e74c3c">No hay mesas disponibles para esta fecha/hora/cantidad de personas</p>';
+    tableSelection.innerHTML = '<p class="info-text" style="color:#e74c3c">No hay mesas disponibles. Las mesas están ocupadas por reservas confirmadas. Debes reservar al menos 3 horas después de la reserva anterior o esperar que el admin libere la mesa.</p>';
     return;
   }
   
@@ -289,7 +299,9 @@ async function handleReservation(e) {
     dishes: getReservedDishes(),
     notes: formData.get('notes') || '',
     status: 'pending',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    active: false,
+    releasedAt: null
   };
   
   // Primero guardar en Supabase

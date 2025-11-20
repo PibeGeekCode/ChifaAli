@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS public.reservations (
   dishes JSONB DEFAULT '[]'::jsonb,
   notes TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
-  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+  "createdAt" TIMESTAMPTZ DEFAULT NOW(),
+  active BOOLEAN DEFAULT false,
+  "releasedAt" TIMESTAMPTZ
 );
 
 -- Crear índices para mejorar el rendimiento
@@ -71,3 +73,10 @@ COMMENT ON COLUMN public.reservations.status IS 'Estados posibles: pending, conf
 COMMENT ON COLUMN public.reservations."tableId" IS 'ID de la mesa asignada (1-10)';
 COMMENT ON COLUMN public.reservations."tableName" IS 'Nombre descriptivo de la mesa';
 COMMENT ON COLUMN public.reservations."createdAt" IS 'Timestamp de creación de la reserva';
+COMMENT ON COLUMN public.reservations.active IS 'true cuando la reserva confirmada mantiene la mesa ocupada';
+COMMENT ON COLUMN public.reservations."releasedAt" IS 'Momento en que la mesa fue liberada manualmente';
+
+-- Alter table safety (para instalaciones existentes)
+ALTER TABLE public.reservations
+  ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "releasedAt" TIMESTAMPTZ;

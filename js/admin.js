@@ -147,10 +147,16 @@ function renderTableMap() {
   const reservations = getReservations();
   const today = new Date().toISOString().split('T')[0];
   const filterDate = currentFilters.date || today;
-  
-  const occupiedTableIds = reservations
-    .filter(r => r.date === filterDate && r.status === 'confirmed')
-    .map(r => r.tableId);
+  // Ocupación en tiempo real considerando ventana de 3 horas desde inicio o hasta liberación
+  const NOW_MINUTES = (() => { const d=new Date(); return d.getHours()*60+d.getMinutes(); })();
+  function timeToMinutes(t){ const [hh,mm]=t.split(':').map(Number); return hh*60+mm; }
+  const occupiedTableIds = reservations.filter(r => {
+      if (r.date !== filterDate) return false;
+      if (r.status !== 'confirmed') return false;
+      if (r.active === false || r.releasedAt) return false;
+      const start = timeToMinutes(r.time);
+      return NOW_MINUTES >= start && NOW_MINUTES < (start + 180); // dentro de la ventana de uso
+    }).map(r => r.tableId);
   
   const tableMap = document.getElementById('tableMap');
   tableMap.innerHTML = TABLES.map(table => {
@@ -289,13 +295,22 @@ function viewReservation(id) {
   // Actualizar botones según estado
   const confirmBtn = document.getElementById('confirmReservation');
   const cancelBtn = document.getElementById('cancelReservation');
+  const releaseBtn = document.getElementById('releaseReservation');
   
   if (reservation.status === 'confirmed') {
     confirmBtn.disabled = true;
     confirmBtn.style.opacity = '0.5';
+    // Mostrar liberar si activo y no liberado
+    if (reservation.active && !reservation.releasedAt) {
+      releaseBtn.style.display = 'inline-block';
+      releaseBtn.disabled = false;
+    } else {
+      releaseBtn.style.display = 'none';
+    }
   } else {
     confirmBtn.disabled = false;
     confirmBtn.style.opacity = '1';
+    releaseBtn.style.display = 'none';
   }
   
   if (reservation.status === 'cancelled') {
@@ -334,13 +349,18 @@ async function updateReservationStatus(id, status) {
   
   if (index !== -1) {
     reservations[index].status = status;
+    if (status === 'confirmed') {
+      reservations[index].active = true; // activar ocupación
+    }
     
     // Primero actualizar en Supabase
     if (window.supabaseClient) {
       try {
+        const updatePayload = { status: status };
+        if (status === 'confirmed') updatePayload.active = true;
         const { error } = await window.supabaseClient
           .from('reservations')
-          .update({ status: status })
+          .update(updatePayload)
           .eq('id', id);
         if (error) throw error;
         console.log('Status updated in Supabase for reservation:', id);
@@ -356,6 +376,31 @@ async function updateReservationStatus(id, status) {
     closeDetailModal();
     await loadDashboard();
   }
+}
+
+// Liberar mesa (terminó el uso real) de una reserva confirmada
+async function releaseReservation() {
+  if (!selectedReservationId) return;
+  const reservations = getReservations();
+  const index = reservations.findIndex(r => r.id === selectedReservationId);
+  if (index === -1) return;
+  if (reservations[index].status !== 'confirmed') return;
+  reservations[index].active = false;
+  reservations[index].releasedAt = new Date().toISOString();
+  saveReservations(reservations);
+  if (window.supabaseClient) {
+    try {
+      const { error } = await window.supabaseClient
+        .from('reservations')
+        .update({ active: false, releasedAt: reservations[index].releasedAt })
+        .eq('id', selectedReservationId);
+      if (error) console.warn('Supabase release failed', error.message || error);
+    } catch (e) {
+      console.warn('Supabase release error', e.message || e);
+    }
+  }
+  closeDetailModal();
+  await loadDashboard();
 }
 
 // Eliminar reserva
@@ -413,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearFilters').addEventListener('click', clearFilters);
   document.getElementById('confirmReservation').addEventListener('click', confirmReservation);
   document.getElementById('cancelReservation').addEventListener('click', cancelReservation);
+  document.getElementById('releaseReservation').addEventListener('click', releaseReservation);
   document.getElementById('closeModal').addEventListener('click', closeDetailModal);
   
   // Cerrar modal al hacer clic en X o fuera
@@ -433,3 +479,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Exponer funciones globalmente
 window.viewReservation = viewReservation;
 window.deleteReservation = deleteReservation;
+window.releaseReservation = releaseReservation;
