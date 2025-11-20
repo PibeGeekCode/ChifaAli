@@ -28,29 +28,9 @@ function getReservations() {
 // Guardar reservas en localStorage
 function saveReservations(reservations) {
   localStorage.setItem('reservations', JSON.stringify(reservations));
-  if (window.DEBUG) console.log('Saved to localStorage:', reservations.length, 'reservations');
-  
-  // Intentar sincronizar con Supabase en background si está configurado
-  if (window.SUPABASE && window.supabaseClient) {
-    if (window.DEBUG) console.log('Attempting Supabase sync...');
-    try {
-      // Subir cada reserva (upsert por id)
-      reservations.forEach(res => {
-        upsertReservationToSupabase(res).catch(err => {
-          // No interrumpimos el flujo por errores de red
-          console.error('Supabase upsert failed for reservation', res.id, err.message || err);
-        });
-      });
-    } catch (err) {
-      console.error('Supabase sync error', err.message || err);
-    }
-  } else {
-    if (!window.SUPABASE) {
-      if (window.DEBUG) console.warn('Supabase not configured - only localStorage active');
-    } else if (!window.supabaseClient) {
-      if (window.DEBUG) console.warn('Supabase client not initialized - only localStorage active');
-    }
-  }
+  console.log('Saved to localStorage:', reservations.length, 'reservations');
+  // NOTA: No sincronizamos con Supabase aquí porque ahora se hace directamente
+  // en las operaciones específicas (insert, update, delete) para mejor control de errores
 }
 
 // --- Supabase helpers (opcional) ---
@@ -124,8 +104,28 @@ function clearReservationDraft() {
 }
 
 // Verificar disponibilidad de mesas para fecha/hora/cantidad de personas
-function getAvailableTables(date, time, guests) {
-  const reservations = getReservations();
+async function getAvailableTables(date, time, guests) {
+  // Obtener reservas actualizadas desde Supabase
+  let reservations = [];
+  if (window.supabaseClient) {
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('reservations')
+        .select('*')
+        .eq('date', date)
+        .eq('time', time)
+        .neq('status', 'cancelled');
+      if (error) throw error;
+      reservations = data || [];
+      console.log('Fetched reservations for availability check:', reservations.length);
+    } catch (err) {
+      console.error('Failed to fetch reservations from Supabase:', err.message || err);
+      reservations = getReservations();
+    }
+  } else {
+    reservations = getReservations();
+  }
+  
   const occupiedTableIds = reservations
     .filter(r => r.date === date && r.time === time && r.status !== 'cancelled')
     .map(r => r.tableId);
@@ -136,7 +136,7 @@ function getAvailableTables(date, time, guests) {
 }
 
 // Renderizar mesas disponibles
-function renderTables() {
+async function renderTables() {
   const date = document.getElementById('date').value;
   const time = document.getElementById('time').value;
   const guests = parseInt(document.getElementById('guests').value) || 1;
@@ -147,7 +147,7 @@ function renderTables() {
     return;
   }
   
-  const availableTables = getAvailableTables(date, time, guests);
+  const availableTables = await getAvailableTables(date, time, guests);
   
   if (availableTables.length === 0) {
     tableSelection.innerHTML = '<p class="info-text" style="color:#e74c3c">No hay mesas disponibles para esta fecha/hora/cantidad de personas</p>';
@@ -236,7 +236,7 @@ function showModal(title, message, onClose) {
 }
 
 // Procesar reserva
-function handleReservation(e) {
+async function handleReservation(e) {
   e.preventDefault();
   
   const formData = new FormData(e.target);
@@ -263,6 +263,24 @@ function handleReservation(e) {
     createdAt: new Date().toISOString()
   };
   
+  // Primero guardar en Supabase
+  if (window.supabaseClient) {
+    try {
+      const { error } = await window.supabaseClient
+        .from('reservations')
+        .insert([reservation]);
+      if (error) throw error;
+      console.log('Reservation saved to Supabase:', reservation.id);
+    } catch (err) {
+      console.error('Failed to save reservation to Supabase:', err.message || err);
+      showModal('Error', 'No se pudo guardar la reserva en la base de datos. Intenta nuevamente.');
+      return;
+    }
+  } else {
+    console.warn('Supabase not configured - saving only to localStorage');
+  }
+  
+  // Luego actualizar localStorage
   const reservations = getReservations();
   reservations.push(reservation);
   saveReservations(reservations);
@@ -288,7 +306,7 @@ function handleReservation(e) {
     `\n\n📱 Mi teléfono: ${reservation.phone}`
   );
   
-  const restaurantPhone = '997077781'; // Número del restaurante
+  const restaurantPhone = '51997077781'; // Número del restaurante
   const whatsappUrl = `https://wa.me/${restaurantPhone}?text=${whatsappMessage}`;
   
   // Limpiar sessionStorage

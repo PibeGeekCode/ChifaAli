@@ -28,19 +28,41 @@ function initSupabaseClient() {
     try {
       if (typeof supabase !== 'undefined' && supabase.createClient) {
         window.supabaseClient = supabase.createClient(window.SUPABASE.url, window.SUPABASE.anonKey);
-        if (window.DEBUG) console.log('Supabase client initialized in admin');
+        console.log('Supabase client initialized in admin');
       } else {
-        if (window.DEBUG) console.warn('Supabase library not loaded in admin');
+        console.warn('Supabase library not loaded in admin');
       }
     } catch (e) {
       console.error('Supabase init failed in admin:', e.message || e);
     }
   } else if (!window.SUPABASE) {
-    if (window.DEBUG) console.warn('window.SUPABASE config not found in admin');
+    console.warn('window.SUPABASE config not found in admin');
   }
 }
 
-// Obtener reservas
+// Obtener reservas desde Supabase (sincronizadas) o localStorage como fallback
+async function fetchReservations() {
+  if (window.supabaseClient) {
+    try {
+      const { data, error } = await window.supabaseClient.from('reservations').select('*').order('createdAt', { ascending: false });
+      if (error) throw error;
+      console.log('Fetched from Supabase:', data?.length || 0, 'reservations');
+      // Guardar en localStorage como cache
+      if (data) {
+        localStorage.setItem('reservations', JSON.stringify(data));
+      }
+      return data || [];
+    } catch (err) {
+      console.error('Fetch reservations from Supabase failed:', err.message || err);
+      console.warn('Falling back to localStorage');
+      return JSON.parse(localStorage.getItem('reservations') || '[]');
+    }
+  }
+  // Si no hay Supabase, usar localStorage
+  return JSON.parse(localStorage.getItem('reservations') || '[]');
+}
+
+// Obtener reservas síncronas (desde localStorage)
 function getReservations() {
   return JSON.parse(localStorage.getItem('reservations') || '[]');
 }
@@ -48,25 +70,15 @@ function getReservations() {
 // Guardar reservas
 function saveReservations(reservations) {
   localStorage.setItem('reservations', JSON.stringify(reservations));
-  // Intentar sincronizar con Supabase en background si está configurado
-  if (window.SUPABASE && window.supabaseClient) {
-    try {
-      reservations.forEach(r => {
-        window.supabaseClient.from('reservations').upsert(r, { onConflict: 'id' }).catch(err => {
-          console.warn('Supabase upsert failed (admin)', r.id, err.message || err);
-        });
-      });
-    } catch (err) {
-      console.warn('Supabase admin sync error', err.message || err);
-    }
-  }
+  // NOTA: No sincronizamos con Supabase aquí porque se hace directamente
+  // en las operaciones específicas (insert, update, delete) para mejor control de errores
 }
 
 // Verificar autenticación
-function checkAuth() {
+async function checkAuth() {
   const isAuthenticated = sessionStorage.getItem('adminAuth') === 'true';
   if (isAuthenticated) {
-    showAdminPanel();
+    await showAdminPanel();
   } else {
     showLoginScreen();
   }
@@ -79,14 +91,14 @@ function showLoginScreen() {
 }
 
 // Mostrar panel admin
-function showAdminPanel() {
+async function showAdminPanel() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminPanel').style.display = 'block';
-  loadDashboard();
+  await loadDashboard();
 }
 
 // Manejar login
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -94,7 +106,7 @@ function handleLogin(e) {
   
   if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
     sessionStorage.setItem('adminAuth', 'true');
-    showAdminPanel();
+    await showAdminPanel();
   } else {
     errorMsg.textContent = 'Usuario o contraseña incorrectos';
     setTimeout(() => errorMsg.textContent = '', 3000);
@@ -108,7 +120,10 @@ function handleLogout() {
 }
 
 // Cargar dashboard completo
-function loadDashboard() {
+async function loadDashboard() {
+  // Primero obtener datos desde Supabase
+  await fetchReservations();
+  // Luego actualizar la UI
   updateStats();
   renderTableMap();
   renderReservationsTable();
@@ -154,20 +169,22 @@ function renderTableMap() {
 }
 
 // Aplicar filtros
-function applyFilters() {
+async function applyFilters() {
   const dateFilter = document.getElementById('filterDate').value;
   const statusFilter = document.getElementById('filterStatus').value;
   
   currentFilters = { date: dateFilter, status: statusFilter };
+  await fetchReservations(); // Refrescar datos antes de filtrar
   renderReservationsTable();
   renderTableMap();
 }
 
 // Limpiar filtros
-function clearFilters() {
+async function clearFilters() {
   document.getElementById('filterDate').value = '';
   document.getElementById('filterStatus').value = 'all';
   currentFilters = { date: '', status: 'all' };
+  await fetchReservations(); // Refrescar datos
   renderReservationsTable();
   renderTableMap();
 }
@@ -311,38 +328,61 @@ function cancelReservation() {
 }
 
 // Actualizar estado de reserva
-function updateReservationStatus(id, status) {
+async function updateReservationStatus(id, status) {
   const reservations = getReservations();
   const index = reservations.findIndex(r => r.id === id);
   
   if (index !== -1) {
     reservations[index].status = status;
+    
+    // Primero actualizar en Supabase
+    if (window.supabaseClient) {
+      try {
+        const { error } = await window.supabaseClient
+          .from('reservations')
+          .update({ status: status })
+          .eq('id', id);
+        if (error) throw error;
+        console.log('Status updated in Supabase for reservation:', id);
+      } catch (e) {
+        console.error('Supabase status update failed', e.message || e);
+        alert('Error al actualizar en la base de datos: ' + (e.message || e));
+        return;
+      }
+    }
+    
+    // Luego actualizar localStorage
     saveReservations(reservations);
     closeDetailModal();
-    loadDashboard();
-    // Si hay supabase, actualizar registro remoto
-    if (window.supabaseClient) {
-      window.supabaseClient.from('reservations').upsert(reservations[index], { onConflict: 'id' }).then(({ error }) => {
-        if (error) console.warn('Supabase status update failed', error.message || error);
-      }).catch(e => console.warn('Supabase error', e));
-    }
+    await loadDashboard();
   }
 }
 
 // Eliminar reserva
-function deleteReservation(id) {
+async function deleteReservation(id) {
   if (!confirm('¿Estás seguro de eliminar esta reserva?')) return;
   
+  // Primero eliminar de Supabase
+  if (window.supabaseClient) {
+    try {
+      const { error } = await window.supabaseClient
+        .from('reservations')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      console.log('Reservation deleted from Supabase:', id);
+    } catch (e) {
+      console.error('Supabase delete failed', e.message || e);
+      alert('Error al eliminar de la base de datos: ' + (e.message || e));
+      return;
+    }
+  }
+  
+  // Luego actualizar localStorage
   const reservations = getReservations();
   const filtered = reservations.filter(r => r.id !== id);
   saveReservations(filtered);
-  loadDashboard();
-  // También intentar borrar en Supabase (opcional)
-  if (window.supabaseClient) {
-    window.supabaseClient.from('reservations').delete().eq('id', id).then(({ error }) => {
-      if (error) console.warn('Supabase delete failed', error.message || error);
-    }).catch(e => console.warn('Supabase delete error', e));
-  }
+  await loadDashboard();
 }
 
 // Cerrar modal de detalle
@@ -361,6 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event listeners
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
   document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+  document.getElementById('refreshBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Actualizando...';
+    await loadDashboard();
+    btn.disabled = false;
+    btn.textContent = '🔄 Actualizar';
+  });
   document.getElementById('applyFilters').addEventListener('click', applyFilters);
   document.getElementById('clearFilters').addEventListener('click', clearFilters);
   document.getElementById('confirmReservation').addEventListener('click', confirmReservation);
